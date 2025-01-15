@@ -36,3 +36,18 @@ out/
 ./gradlew
 ./gradlew.bat
 gradle/
+
+### Common Gradle ###
+.gradle/
+.gradle-cache/
+gradle/wrapper/gradle-wrapper.properties.lock
+
+### Ktor ###
+local.properties
+ktor_local.properties
+logs/
+tmp/
+
+### OS Specific ###
+.DS_Store
+Thumbs.db

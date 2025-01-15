@@ -1,9 +1,15 @@
 ktor:
     application:
         modules:
-            - com.leoschulmann.ApplicationKt.module
+          - com.leoschulmann.almi.DBKt.configureDatabase
+          - com.leoschulmann.almi.PluginsKt.configureSerialization
+          - com.leoschulmann.almi.api.RootApiKt.rootApi
+          - com.leoschulmann.almi.api.PrepositionApiKt.prepositionApi
+          - com.leoschulmann.almi.api.BinyanApiKt.binyanApi
+          - com.leoschulmann.almi.api.GizrahApiKt.gizrahApi
+          - com.leoschulmann.almi.api.VerbApiKt.verbApi
     deployment:
-        port: 8080
+        port: 9999
 postgres:
   url: "jdbc:postgresql://localhost/default"
   user: username
