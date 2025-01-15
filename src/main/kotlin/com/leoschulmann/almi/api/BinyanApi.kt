@@ -1,5 +1,6 @@
 package com.leoschulmann.almi.api
 
+import com.leoschulmann.almi.dto.toDto
 import com.leoschulmann.almi.entities.Binyan
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -20,7 +21,7 @@ fun Application.binyanApi() {
 
                 call.respond(HttpStatusCode.OK, binyan.id.value)
             }
-            
+
             put {
                 val id = call.parameters["id"]?.toLongOrNull()
                 val newValue = call.receiveText()
@@ -45,6 +46,24 @@ fun Application.binyanApi() {
                 }
 
                 call.respond(HttpStatusCode.OK, updatedBinyan.id.value)
+            }
+
+            get {
+                val id = call.parameters["id"]?.toLongOrNull()
+                if (id == null) {
+                    val all = transaction { Binyan.all().map { it.toDto() }.toList() }
+                    call.respond(HttpStatusCode.OK, all)
+                    return@get
+                }
+
+                val binyan: Binyan? = transaction { Binyan.findById(id) }
+
+                if (binyan == null) {
+                    call.respond(HttpStatusCode.NotFound, "Binyan entity not found")
+                    return@get
+                }
+
+                call.respond(HttpStatusCode.OK, binyan.toDto())
             }
         }
     }
