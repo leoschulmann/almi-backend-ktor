@@ -1,5 +1,6 @@
 package com.leoschulmann.almi.api
 
+import com.leoschulmann.almi.dto.toDto
 import com.leoschulmann.almi.entities.Preposition
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -44,6 +45,25 @@ fun Application.prepositionApi() {
                 }
 
                 call.respond(HttpStatusCode.OK, updatedPreposition.id.value)
+            }
+
+            get {
+                val id = call.parameters["id"]?.toLongOrNull()
+                if (id == null) {
+                    val dtos = transaction {
+                        Preposition.all().map { it.toDto() }
+                    }
+                    call.respond(HttpStatusCode.OK, dtos)
+                    return@get
+                } else {
+                    val preposition = transaction { Preposition.findById(id) }
+                    if (preposition == null) {
+                        call.respond(HttpStatusCode.NotFound, "Preposition entity not found")
+                        return@get
+                    } else {
+                        call.respond(HttpStatusCode.OK, preposition.toDto())
+                    }
+                }
             }
         }
     }

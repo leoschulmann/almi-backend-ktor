@@ -16,6 +16,6 @@ class Verb(id: EntityID<Long>) : LongEntity(id) {
     var binyan by Binyan referencedOn VerbTable.binyan
     var root by Root referencedOn VerbTable.root
 
-    var preposions: SizedIterable<Preposition> by Preposition via VerbPrepositionJointable
+    var prepositions: SizedIterable<Preposition> by Preposition via VerbPrepositionJointable
     var gizrahs: SizedIterable<Gizrah> by Gizrah via VerbGizrahJointable
 }
