@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VerbDto(
     val id: Long,
-    
+
     @SerialName("v")
     val value: String,
 
@@ -24,7 +24,10 @@ data class VerbDto(
     val gizrahs: List<GizrahDto>,
 
     @SerialName("p")
-    val prepositions: List<PrepositionDto>
+    val prepositions: List<PrepositionDto>,
+
+    @SerialName("t")
+    val translations: List<VerbTranslationDto>
 )
 
 fun Verb.toDto() = VerbDto(
@@ -34,4 +37,5 @@ fun Verb.toDto() = VerbDto(
     binyan.toDto(),
     root.toDto(),
     gizrahs.map { it.toDto() },
-    prepositions.map { it.toDto() })
+    prepositions.map { it.toDto() },
+    translations.map { it.toDto() })

@@ -27,7 +27,8 @@ object DatabaseFactory {
                 RootTable,
                 VerbGizrahJointable,
                 VerbPrepositionJointable,
-                VerbTable
+                VerbTable, 
+                VerbTranslationTable
             )
         }
     }

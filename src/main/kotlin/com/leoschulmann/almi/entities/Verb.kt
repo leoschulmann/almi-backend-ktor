@@ -3,6 +3,7 @@ package com.leoschulmann.almi.entities
 import com.leoschulmann.almi.tables.VerbGizrahJointable
 import com.leoschulmann.almi.tables.VerbPrepositionJointable
 import com.leoschulmann.almi.tables.VerbTable
+import com.leoschulmann.almi.tables.VerbTranslationTable
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -18,4 +19,5 @@ class Verb(id: EntityID<Long>) : LongEntity(id) {
 
     var prepositions: SizedIterable<Preposition> by Preposition via VerbPrepositionJointable
     var gizrahs: SizedIterable<Gizrah> by Gizrah via VerbGizrahJointable
+    val translations: SizedIterable<VerbTranslation> by VerbTranslation referrersOn VerbTranslationTable.verb
 }
