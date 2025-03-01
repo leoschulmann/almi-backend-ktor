@@ -8,6 +8,7 @@ ktor:
           - com.leoschulmann.almi.api.BinyanApiKt.binyanApi
           - com.leoschulmann.almi.api.GizrahApiKt.gizrahApi
           - com.leoschulmann.almi.api.VerbApiKt.verbApi
+          - com.leoschulmann.almi.api.VerbFormApiKt.verbFormApi
     deployment:
         port: 9999
 postgres:
