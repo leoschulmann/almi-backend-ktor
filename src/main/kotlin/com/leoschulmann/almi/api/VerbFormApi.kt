@@ -1,6 +1,7 @@
 package com.leoschulmann.almi.api
 
 import com.leoschulmann.almi.dto.CreateVerbFormDto
+import com.leoschulmann.almi.dto.toDto
 import com.leoschulmann.almi.entities.Verb
 import com.leoschulmann.almi.entities.VerbForm
 import com.leoschulmann.almi.entities.VerbFormTransliteration
@@ -9,6 +10,8 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.dao.load
+import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Application.verbFormApi() {
@@ -40,6 +43,22 @@ fun Application.verbFormApi() {
                     }
                 }
                 call.respond(HttpStatusCode.OK, verbForm.id.value)
+            }
+
+            get {
+                val verbId = call.parameters["verb_id"]?.toLongOrNull()
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid verb ID")
+
+                val forms = transaction {
+                    Verb.findById(verbId)
+                        ?.load(Verb::forms)
+                        ?.forms
+                        ?.with(VerbForm::transliterations)
+                        ?.map { it.toDto() }
+                        ?: emptyList()
+                }
+
+                call.respond(HttpStatusCode.OK, forms)
             }
         }
     }
