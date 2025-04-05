@@ -1,5 +1,6 @@
 package com.leoschulmann.almi.api
 
+import com.leoschulmann.almi.dto.RootDto
 import com.leoschulmann.almi.dto.toDto
 import com.leoschulmann.almi.entities.PagedResponse
 import com.leoschulmann.almi.entities.Root
@@ -16,11 +17,11 @@ fun Application.rootApi() {
             post {
                 val newRoot = call.receiveText() // validate
 
-                val root = transaction {
+                val rootDto: RootDto = transaction {
                     Root.new { value = newRoot }
-                }
-
-                call.respond(HttpStatusCode.OK, root.id.value)
+                }.toDto()
+                
+                call.respond(HttpStatusCode.OK, rootDto)
             }
 
             put {

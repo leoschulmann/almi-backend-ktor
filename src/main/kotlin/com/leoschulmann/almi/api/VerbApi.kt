@@ -1,11 +1,10 @@
 package com.leoschulmann.almi.api
 
-import com.leoschulmann.almi.dto.CreateVerbDto
-import com.leoschulmann.almi.dto.CreateVerbTranslationDto
-import com.leoschulmann.almi.dto.toDto
+import com.leoschulmann.almi.dto.*
 import com.leoschulmann.almi.entities.*
 import com.leoschulmann.almi.tables.GizrahTable
 import com.leoschulmann.almi.tables.PrepositionTable
+import com.leoschulmann.almi.tables.VerbTable
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -46,6 +45,7 @@ fun Application.verbApi() {
 
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
+                val rootId = call.parameters["rootId"]?.toLongOrNull()
                 val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
                 val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
 
@@ -63,6 +63,12 @@ fun Application.verbApi() {
                     
                     call.respond(HttpStatusCode.OK, dto)
                     return@get
+                } else if (rootId != null) {
+                    val dtos: List<ShortVerbDto> = transaction {
+                        Verb.find { VerbTable.root eq rootId }.map { it.toDtoShort() }
+                    }
+                    
+                    return@get call.respond(HttpStatusCode.OK, dtos)
                 } else {
                     val pagedResponse = transaction {
                         val dtos = Verb.all().limit(size).offset((page * size).toLong())
