@@ -49,4 +49,5 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
+    implementation("io.ktor:ktor-server-cors-jvm:$ktor_version")
 }

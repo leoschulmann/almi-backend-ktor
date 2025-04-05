@@ -9,6 +9,7 @@ ktor:
           - com.leoschulmann.almi.api.GizrahApiKt.gizrahApi
           - com.leoschulmann.almi.api.VerbApiKt.verbApi
           - com.leoschulmann.almi.api.VerbFormApiKt.verbFormApi
+          - com.leoschulmann.almi.CORSConfigurationKt.configureCORS
     deployment:
         port: 9999
 postgres:
