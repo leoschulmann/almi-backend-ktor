@@ -51,7 +51,7 @@ fun Application.binyanApi() {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                 if (id == null) {
-                    val all = transaction { Binyan.all().map { it.toDto() }.toList() }
+                    val all = transaction { Binyan.all().map { it.toDto() } }
                     call.respond(HttpStatusCode.OK, all)
                     return@get
                 }

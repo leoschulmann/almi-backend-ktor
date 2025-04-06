@@ -6,7 +6,7 @@ import com.leoschulmann.almi.enums.Plurality
 import com.leoschulmann.almi.enums.Tense
 import org.jetbrains.exposed.dao.id.LongIdTable
 
-object VerbFormTable : LongIdTable("verbform") {
+object VerbFormTable : LongIdTable("appdata.verbform") {
     val verb = reference("verb_id", VerbTable)
     val value = varchar("value", 255)
     val tense = enumerationByName("tense", 32, Tense::class)

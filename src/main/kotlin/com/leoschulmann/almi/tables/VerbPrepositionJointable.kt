@@ -3,7 +3,7 @@ package com.leoschulmann.almi.tables
 import org.h2.table.TableBase
 import org.jetbrains.exposed.sql.Table
 
-object VerbPrepositionJointable : Table("verb_preposition") {
+object VerbPrepositionJointable : Table("appdata.verb_preposition") {
     val verb = reference("verb_id", VerbTable)
     val preposition = reference("preposition_id", PrepositionTable)
     override val primaryKey = PrimaryKey(verb, preposition)

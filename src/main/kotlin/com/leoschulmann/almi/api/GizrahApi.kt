@@ -51,7 +51,7 @@ fun Application.gizrahApi() {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                 if (id == null) {
-                    val gizrahs = transaction { Gizrah.all() }.map { it.toDto() }
+                    val gizrahs = transaction { Gizrah.all().map { it.toDto() } }
                     call.respond(HttpStatusCode.OK, gizrahs)
                     return@get
                 } else {
