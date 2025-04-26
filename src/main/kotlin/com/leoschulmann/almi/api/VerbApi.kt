@@ -11,6 +11,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.dao.load
+import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Application.verbApi() {
@@ -29,7 +30,7 @@ fun Application.verbApi() {
                 val prepositions =
                     transaction { Preposition.find { PrepositionTable.id inList createVerbDto.prepositionId } }
 
-                val verb: Verb = transaction {
+                val verbDto = transaction {
                     Verb.new {
                         this.value = createVerbDto.value
                         this.root = root
@@ -37,10 +38,10 @@ fun Application.verbApi() {
                     }.apply {
                         this.prepositions = prepositions
                         gizrahs = gizrahList
-                    }
+                    }.toDto()
                 }
 
-                call.respond(HttpStatusCode.Created, verb.id.value)
+                call.respond(HttpStatusCode.Created, verbDto)
             }
 
             get {
@@ -65,7 +66,9 @@ fun Application.verbApi() {
                     return@get
                 } else if (rootId != null) {
                     val dtos: List<ShortVerbDto> = transaction {
-                        Verb.find { VerbTable.root eq rootId }.map { it.toDtoShort() }
+                        Verb.find { VerbTable.root eq rootId }
+                            .with(Verb::translations)
+                            .map { it.toDtoShort() }
                     }
                     
                     return@get call.respond(HttpStatusCode.OK, dtos)
