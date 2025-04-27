@@ -38,6 +38,15 @@ fun Application.verbApi() {
                     }.apply {
                         this.prepositions = prepositions
                         gizrahs = gizrahList
+                        createVerbDto.translations.forEach { (lang, value) ->
+                            translations.plus(
+                                VerbTranslation.new {
+                                    this.lang = lang
+                                    this.value = value
+                                    this.verb = this@apply
+                                }
+                            )
+                        }
                     }.toDto()
                 }
 

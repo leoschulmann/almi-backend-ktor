@@ -1,5 +1,6 @@
 package com.leoschulmann.almi.dto
 
+import com.leoschulmann.almi.enums.Lang
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,6 +19,9 @@ data class CreateVerbDto(
     val gizrahId: List<Long>,
 
     @SerialName("p")
-    val prepositionId: List<Long>
+    val prepositionId: List<Long>,
+    
+    @SerialName("t")
+    val translations: Map<Lang, String>
 )
     
