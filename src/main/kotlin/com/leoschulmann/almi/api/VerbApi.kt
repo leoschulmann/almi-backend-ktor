@@ -53,6 +53,29 @@ fun Application.verbApi() {
                 call.respond(HttpStatusCode.Created, verbDto)
             }
 
+            put {
+                val dto = call.receive(UpdateVerbDto::class)
+
+                val verb = transaction { Verb.findById(dto.id) }
+                if (verb == null) {
+                    call.respond(HttpStatusCode.NotFound, "Verb entity not found")
+                    return@put
+                }
+                if (dto.version != verb.version) {
+                    call.respond(HttpStatusCode.Conflict, "Version mismatch")
+                }
+
+                val res = transaction {
+                    if (dto.value != verb.value) {
+                        verb.value = dto.value
+                        verb.version += 1
+                    }
+
+                    verb.toDtoShort()
+                }
+                call.respond(HttpStatusCode.OK, res)
+            }
+
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                 val rootId = call.parameters["rootId"]?.toLongOrNull()
