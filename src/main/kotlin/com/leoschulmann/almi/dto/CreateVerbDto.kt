@@ -22,6 +22,6 @@ data class CreateVerbDto(
     val prepositionId: List<Long>,
     
     @SerialName("t")
-    val translations: Map<Lang, String>
+    val translations: List<VerbTranslationDto>
 )
     
