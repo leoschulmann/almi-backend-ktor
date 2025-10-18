@@ -1,7 +1,11 @@
 package com.leoschulmann.almi.api
 
+import com.leoschulmann.almi.dto.GizrahDto
 import com.leoschulmann.almi.dto.toDto
 import com.leoschulmann.almi.entities.Gizrah
+import io.github.smiley4.ktoropenapi.get
+import io.github.smiley4.ktoropenapi.post
+import io.github.smiley4.ktoropenapi.put
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -12,22 +16,34 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun Application.gizrahApi() {
     routing {
         route("/api/gizrah") {
-            post {
+            post({
+                request { body<String>() }
+                response { code(HttpStatusCode.Created) { body<GizrahDto>() } }
+            }) {
                 val newGizrah = call.receiveText() // validate
 
                 val gizrah = transaction {
                     Gizrah.new { value = newGizrah }
                 }
 
-                call.respond(HttpStatusCode.OK, gizrah.id.value)
+                call.respond(HttpStatusCode.Created, gizrah.toDto())
             }
 
-            put {
-                val id = call.parameters["id"]?.toLongOrNull()
-                val newValue = call.receiveText()
+            put({
+                request {
+                    body<GizrahDto>()
+                }
+                response {
+                    code(HttpStatusCode.OK) { body<GizrahDto>() }
+                    code(HttpStatusCode.NotFound) {}
+                    code(HttpStatusCode.BadRequest) {}
+                }
+            }) {
+                
+                val (id, newval, _) = call.receive<GizrahDto>()
 
-                if (id == null || newValue.isBlank()) {
-                    call.respond(HttpStatusCode.BadRequest, "Invalid ID or value")
+                if (newval.isBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid value")
                     return@put
                 }
 
@@ -40,19 +56,42 @@ fun Application.gizrahApi() {
 
                 val updatedGizrah = transaction {
                     gizrah.apply {
-                        value = newValue
+                        value = newval
                         version += 1
                     }
                 }
 
-                call.respond(HttpStatusCode.OK, updatedGizrah.id.value)
+                call.respond(HttpStatusCode.OK, updatedGizrah.toDto())
             }
 
-            get {
+            get({
+                response {
+                    code(HttpStatusCode.OK) {
+                        body<List<GizrahDto>>()
+                    }
+                }
+            }) {
+                val gizrahs = transaction { Gizrah.all().map { it.toDto() } }
+                call.respond(HttpStatusCode.OK, gizrahs)
+                return@get
+            }
+
+            get("{id}", {
+                request {
+                    pathParameter<Int>("id")
+                }
+
+                response {
+                    code(HttpStatusCode.OK) {
+                        body<GizrahDto>()
+                    }
+                    code(HttpStatusCode.NotFound) {}
+                    code(HttpStatusCode.BadRequest) {}
+                }
+            }) {
                 val id = call.parameters["id"]?.toLongOrNull()
                 if (id == null) {
-                    val gizrahs = transaction { Gizrah.all().map { it.toDto() } }
-                    call.respond(HttpStatusCode.OK, gizrahs)
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                     return@get
                 } else {
                     val gizrah: Gizrah? = transaction { Gizrah.findById(id) }

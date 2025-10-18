@@ -27,7 +27,6 @@ application {
 repositories {
     mavenCentral()
 }
-
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-server-netty-jvm")
@@ -36,8 +35,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("com.h2database:h2:$h2_version")
-    implementation("io.ktor:ktor-server-openapi")
-    implementation("io.ktor:ktor-server-swagger-jvm")
+    implementation("io.github.smiley4:ktor-swagger-ui:5.3.0")
+    implementation("io.github.smiley4:ktor-openapi:5.3.0")
     implementation("io.ktor:ktor-serialization-jackson-jvm")
     implementation("org.postgresql:postgresql:$postgres_version")
     implementation("io.insert-koin:koin-ktor:$koin_version")

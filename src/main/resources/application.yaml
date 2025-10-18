@@ -11,6 +11,7 @@ ktor:
           - com.leoschulmann.almi.api.VerbFormApiKt.verbFormApi
           - com.leoschulmann.almi.CORSConfigurationKt.configureCORS
           - com.leoschulmann.almi.api.LangApiKt.langApi
+          - com.leoschulmann.almi.api.SwaggerAPIKt.swaggerAPI
     deployment:
         port: 9999
 postgres:
