@@ -78,16 +78,16 @@ data class CreateVerbFormDto(
 data class UpdateVerbFormDto(
 
     val id: Long,
-
-    @SerialName("ver")
-    val version: Int,
-
+    
     @SerialName("v")
     val value: String,
 
-    @SerialName("cts")
-    val createTransliterations: List<Pair<Lang, String>>,
+//    @SerialName("cts")
+//    val createTransliterations: List<Pair<Lang, String>>,
 
-    @SerialName("uts")
-    val updateTransliterations: List<UpdateVerbFormTransliteration>
+//    @SerialName("uts")
+//    val updateTransliterations: List<UpdateVerbFormTransliteration>
+    
+    @SerialName("t")
+    val upsertTransliterations: List<UpsertVFormTransliterationDto>
 )

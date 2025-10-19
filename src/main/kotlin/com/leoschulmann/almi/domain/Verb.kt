@@ -36,7 +36,7 @@ class Verb(id: EntityID<Long>) : LongEntity(id) {
         id.value,
         value,
         version,
-        binyan.toBinyanDto(),
+        binyan.toDto(),
         root.toDto(),
         gizrahs.map { it.toDto() },
         prepositions.map { it.toDto() },
@@ -88,15 +88,13 @@ data class CreateVerbDto(
 
     @SerialName("p") val prepositionId: List<Long>,
 
-    @SerialName("t") val translations: List<VerbTranslationDto>
+    @SerialName("t") val translations: List<CreateVerbTranslationDto>
 )
 
 
 @Serializable
 data class UpdateVerbDto(
     val id: Long,
-
-    @SerialName("ver") val version: Int,
 
     @SerialName("v") val value: String,
 )

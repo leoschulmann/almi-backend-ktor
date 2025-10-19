@@ -1,6 +1,9 @@
 package com.leoschulmann.almi.api
 
 import com.leoschulmann.almi.domain.*
+import io.github.smiley4.ktoropenapi.get
+import io.github.smiley4.ktoropenapi.post
+import io.github.smiley4.ktoropenapi.put
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -12,103 +15,123 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Application.verbFormApi() {
     routing {
-        route("/api/verb/form") {
-            post {
+        route("/api/vform") {
+            createVerbForm()
 
-                val dto = call.receive<CreateVerbFormDto>()
+            updateVerbForm()
 
-                val verb = transaction { Verb.findById(dto.verbId) }
-                    ?: return@post call.respond(HttpStatusCode.NotFound, "Verb not found")
-
-                val verbForm = transaction {
-                    VerbForm.new {
-                        value = dto.value
-                        this.verb = verb
-                        plurality = dto.pluralityGender.getPlurality()
-                        gender = dto.pluralityGender.getGrammaticalGender()
-                        person = dto.tenseAndPerson.getPerson()
-                        tense = dto.tenseAndPerson.getTense()
-                    }.apply {
-                        dto.transliterations.forEach { (lang, value) ->
-                            transliterations.plus(VerbFormTransliteration.new {
-                                this.lang = lang
-                                this.value = value
-                                this.verbForm = this@apply
-                            })
-                        }
-                    }.toDto()
-                }
-                call.respond(HttpStatusCode.OK, verbForm)
-            }
-
-            put {
-                val dto = call.receive<UpdateVerbFormDto>()
-
-                val entity = transaction {
-                    VerbForm.findById(dto.id)
-                } ?: return@put call.respond(HttpStatusCode.NotFound, "Verb form not found")
-
-                if (dto.version != entity.version) {
-                    return@put call.respond(HttpStatusCode.Conflict, "Version mismatch")
-                }
-
-                val transliterationVersionMap =
-                    transaction {
-                        VerbFormTransliteration.find { VerbFormTranslitTable.verbForm eq entity.id }
-                            .associate { it.id.value to it.version }
-                    }
-                        
-
-                if (!dto.updateTransliterations.all {
-                        transliterationVersionMap.containsKey(it.id) && transliterationVersionMap[it.id] == it.version
-                    }) {
-                    return@put call.respond(HttpStatusCode.Conflict, "Transliterations version mismatch")
-                }
-
-                val verbFormDto = transaction {
-                    if (dto.value != entity.value) {
-                        entity.value = dto.value
-                        entity.version += 1
-                    }
-
-                    dto.updateTransliterations.forEach { (id, version, value) ->
-                        entity.transliterations.find { it.id.value == id }?.let {
-                            if (it.value != value) {
-                                it.value = value
-                                it.version += 1
-                            }
-                        }
-                    }
-
-                    dto.createTransliterations.forEach { (lang, value) ->
-                        entity.transliterations.plus(VerbFormTransliteration.new {
-                            this.lang = lang
-                            this.value = value
-                            this.verbForm = entity
-                        })
-                    }
-
-                    entity.toDto()
-                }
-
-                return@put call.respond(HttpStatusCode.OK, verbFormDto)
-            }
-
-            get {
-                val verbId = call.parameters["verb_id"]?.toLongOrNull()
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid verb ID")
-
-                val forms = transaction {
-                    Verb.findById(verbId)
-                        ?.load(Verb::forms)
-                        ?.forms
-                        ?.with(VerbForm::transliterations)
-                        ?.map { it.toDto() }
-                        ?: emptyList()
-                }
-
-                call.respond(HttpStatusCode.OK, forms)
-            }
+            fetchVerbForms()
         }
+    }
+}
+
+private fun Route.fetchVerbForms() {
+    get("{verbId}", {
+        request { pathParameter<Long>("verbId") { required = true } }
+        response {
+            code(HttpStatusCode.OK) { body<List<VerbFormDto>>() }
+            code(HttpStatusCode.BadRequest) { }
+        }
+    }) {
+        val verbId = call.parameters["verbId"]?.toLongOrNull()
+        if (verbId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid verb ID")
+            return@get
+        }
+
+        val forms = transaction {
+            Verb.findById(verbId)?.load(Verb::forms)?.forms?.with(VerbForm::transliterations)?.map { it.toDto() }
+                ?: emptyList()
+        }
+
+        call.respond(HttpStatusCode.OK, forms)
+    }
+}
+
+private fun Route.updateVerbForm() {
+    put({
+        request { body<UpdateVerbFormDto>() }
+        response {
+            code(HttpStatusCode.OK) { body<VerbFormDto>() }
+            code(HttpStatusCode.NotFound) { }
+            code(HttpStatusCode.Conflict) { }
+        }
+    }) {
+        val dto = call.receive<UpdateVerbFormDto>()
+        val toInsert = dto.upsertTransliterations.filter { it.id == null }
+        val toUpdate = dto.upsertTransliterations.filter { it.id != null }
+
+        val verbForm = transaction {
+            VerbForm.findById(dto.id)?.load(VerbForm::transliterations)?.apply {}
+        }
+
+        if (verbForm == null) {
+            call.respond(HttpStatusCode.NotFound, "Verb form not found")
+            return@put
+        }
+
+        val updatedVerbFormDto = transaction {
+            toInsert.forEach {
+                verbForm.transliterations.plus(VerbFormTransliteration.new {
+                    this.lang = it.lang
+                    this.value = it.value
+                    this.version = 0
+                    this.verbForm = verbForm
+                })
+            }
+            toUpdate.forEach { toupdatedto ->
+                verbForm.transliterations.find { toupdatedto.id == it.id.value }?.let {
+                    if (it.lang != toupdatedto.lang || it.value != toupdatedto.value) {
+                        it.value = toupdatedto.value
+                        it.lang = toupdatedto.lang
+                        it.version += 1
+                    }
+                }
+            }
+            if (verbForm.value != dto.value) {
+                verbForm.value = dto.value
+                verbForm.version += 1
+            }
+            return@transaction verbForm.toDto()
+        }
+        call.respond(HttpStatusCode.OK, updatedVerbFormDto)
+    }
+}
+
+private fun Route.createVerbForm() {
+    post({
+        request { body<CreateVerbFormDto>() }
+        response {
+            code(HttpStatusCode.Created) { body<VerbFormDto>() }
+            code(HttpStatusCode.BadRequest) { }
+            code(HttpStatusCode.NotFound) { }
+        }
+    }) {
+
+        val dto = call.receive<CreateVerbFormDto>()
+
+        val verb = transaction { Verb.findById(dto.verbId) } ?: return@post call.respond(
+            HttpStatusCode.NotFound, "Verb not found"
+        )
+
+        val verbForm = transaction {
+            VerbForm.new {
+                value = dto.value
+                this.verb = verb
+                plurality = dto.pluralityGender.getPlurality()
+                gender = dto.pluralityGender.getGrammaticalGender()
+                person = dto.tenseAndPerson.getPerson()
+                tense = dto.tenseAndPerson.getTense()
+            }.apply {
+                dto.transliterations.forEach { (lang, value) ->
+                    transliterations.plus(VerbFormTransliteration.new {
+                        this.lang = lang
+                        this.value = value
+                        this.verbForm = this@apply
+                    })
+                }
+            }.toDto()
+        }
+        call.respond(HttpStatusCode.Created, verbForm)
     }
 }

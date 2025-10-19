@@ -1,6 +1,11 @@
 package com.leoschulmann.almi.api
 
 import com.leoschulmann.almi.domain.Binyan
+import com.leoschulmann.almi.domain.BinyanDto
+import com.leoschulmann.almi.domain.ReqBinyanDto
+import io.github.smiley4.ktoropenapi.get
+import io.github.smiley4.ktoropenapi.post
+import io.github.smiley4.ktoropenapi.put
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -11,21 +16,41 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun Application.binyanApi() {
     routing {
         route("/api/binyan") {
-            post {
+
+            post({
+                request { body<String>() }
+                response {
+                    code(HttpStatusCode.Created) { body<BinyanDto>() }
+                    code(HttpStatusCode.BadRequest) {}
+                }
+            }) {
                 val newBinyan = call.receiveText() // validate
+
+                if (newBinyan.isBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid value")
+                    return@post
+                }
 
                 val binyan = transaction {
                     Binyan.new { value = newBinyan }
                 }
 
-                call.respond(HttpStatusCode.OK, binyan.id.value)
+                call.respond(HttpStatusCode.Created, binyan.toDto())
             }
 
-            put {
-                val id = call.parameters["id"]?.toLongOrNull()
-                val newValue = call.receiveText()
+            put({
+                request { body<ReqBinyanDto>() }
+                response {
+                    code(HttpStatusCode.OK) { body<BinyanDto>() }
+                    code(HttpStatusCode.NotFound) {}
+                    code(HttpStatusCode.BadRequest) {}
+                }
+            }) {
 
-                if (id == null || newValue.isBlank()) {
+                val (id, newValue) = call.receive<ReqBinyanDto>()
+
+
+                if (newValue.isBlank()) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid ID or value")
                     return@put
                 }
@@ -47,11 +72,25 @@ fun Application.binyanApi() {
                 call.respond(HttpStatusCode.OK, updatedBinyan.id.value)
             }
 
-            get {
+            get({
+                response { code(HttpStatusCode.OK) { body<List<BinyanDto>>() } }
+            }) {
+                val all = transaction { Binyan.all().map { it.toDto() } }
+                call.respond(HttpStatusCode.OK, all)
+                return@get
+            }
+
+            get("{id}", {
+                request { pathParameter<Int>("id", { required = true }) }
+                response {
+                    code(HttpStatusCode.OK) { body<BinyanDto>() }
+                    code(HttpStatusCode.NotFound) {}
+                    code(HttpStatusCode.BadRequest) {}
+                }
+            }) {
                 val id = call.parameters["id"]?.toLongOrNull()
                 if (id == null) {
-                    val all = transaction { Binyan.all().map { it.toBinyanDto() } }
-                    call.respond(HttpStatusCode.OK, all)
+                    call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                     return@get
                 }
 
@@ -62,7 +101,7 @@ fun Application.binyanApi() {
                     return@get
                 }
 
-                call.respond(HttpStatusCode.OK, binyan.toBinyanDto())
+                call.respond(HttpStatusCode.OK, binyan.toDto())
             }
         }
     }

@@ -27,4 +27,5 @@ class Preposition(id: EntityID<Long>) : LongEntity(id) {
 @Serializable
 data class PrepositionDto(val id: Long, @SerialName("p") val value: String, @SerialName("ver") val version: Int)
 
-
+@Serializable
+data class UpdatePrepositionDto(val id: Long, @SerialName("p") val value: String)

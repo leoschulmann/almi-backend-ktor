@@ -39,8 +39,8 @@ data class TransliterationDto(
 
 
 @Serializable
-data class UpdateVerbFormTransliteration(
-    val id: Long,
-    @SerialName("ver") val version: Int,
-    @SerialName("v") val value: String
+data class UpsertVFormTransliterationDto(
+    val id: Long?,
+    @SerialName("v") val value: String,
+    val lang: Lang
 )

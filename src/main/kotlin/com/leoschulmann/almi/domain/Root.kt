@@ -24,3 +24,6 @@ class Root(id: EntityID<Long>) : LongEntity(id) {
 
 @Serializable
 data class RootDto(val id: Long, @SerialName("r") val value: String, @SerialName("ver") val version: Int)
+
+@Serializable
+data class UpdateRootDto(val id: Long, @SerialName("r") val value: String)

@@ -18,10 +18,11 @@ class Binyan(id: EntityID<Long>) : LongEntity(id) {
     var value by BinyanTable.value
     var version by BinyanTable.version
     
-    fun toBinyanDto() = BinyanDto(id.value, value, version)
+    fun toDto() = BinyanDto(id.value, value, version)
 }
 
 @Serializable
 data class BinyanDto(val id: Long, @SerialName("b") val value: String, @SerialName("ver") val version: Int)
 
-//fun Binyan.toBinyanDto() = BinyanDto(id.value, value, version)
+@Serializable
+data class ReqBinyanDto(val id: Long, @SerialName("b") val value: String)
