@@ -1,7 +1,6 @@
 package com.leoschulmann.almi.api
 
-import com.leoschulmann.almi.dto.toDto
-import com.leoschulmann.almi.entities.Binyan
+import com.leoschulmann.almi.domain.Binyan
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -51,7 +50,7 @@ fun Application.binyanApi() {
             get {
                 val id = call.parameters["id"]?.toLongOrNull()
                 if (id == null) {
-                    val all = transaction { Binyan.all().map { it.toDto() } }
+                    val all = transaction { Binyan.all().map { it.toBinyanDto() } }
                     call.respond(HttpStatusCode.OK, all)
                     return@get
                 }
@@ -63,7 +62,7 @@ fun Application.binyanApi() {
                     return@get
                 }
 
-                call.respond(HttpStatusCode.OK, binyan.toDto())
+                call.respond(HttpStatusCode.OK, binyan.toBinyanDto())
             }
         }
     }

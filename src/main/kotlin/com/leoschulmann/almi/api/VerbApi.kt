@@ -1,10 +1,11 @@
 package com.leoschulmann.almi.api
 
-import com.leoschulmann.almi.dto.*
-import com.leoschulmann.almi.entities.*
-import com.leoschulmann.almi.tables.GizrahTable
-import com.leoschulmann.almi.tables.PrepositionTable
-import com.leoschulmann.almi.tables.VerbTable
+import com.leoschulmann.almi.dbhelper.PagedResponse
+import com.leoschulmann.almi.domain.*
+import com.leoschulmann.almi.enums.GrammaticalGender
+import com.leoschulmann.almi.enums.GrammaticalPerson
+import com.leoschulmann.almi.enums.Plurality
+import com.leoschulmann.almi.enums.Tense
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -56,7 +57,17 @@ fun Application.verbApi() {
                                 }
                             }
                         }
-                    }.toDto()
+
+                        VerbForm.new { // creates default verb form (infinitive) with the verb
+                            this.value = createVerbDto.value
+                            this.tense = Tense.INFINITIVE
+                            person = GrammaticalPerson.NONE
+                            plurality = Plurality.NONE
+                            gender = GrammaticalGender.NONE
+                            this.verb = this@apply
+                        }
+                        
+                    }.toFullDto()
                 }
 
                 call.respond(HttpStatusCode.Created, verbDto)
@@ -80,7 +91,7 @@ fun Application.verbApi() {
                         verb.version += 1
                     }
 
-                    verb.toDtoShort()
+                    verb.toShortDto()
                 }
                 call.respond(HttpStatusCode.OK, res)
             }
@@ -100,16 +111,16 @@ fun Application.verbApi() {
                     val dto = transaction {
                         val verb = Verb.findById(id)
                             ?.load(Verb::gizrahs, Verb::prepositions, Verb::root, Verb::binyan, Verb::translations)
-                        verb?.toDto()
+                        verb?.toFullDto()
                     } ?: return@get call.respond(HttpStatusCode.NotFound, "Verb entity not found")
                     
                     call.respond(HttpStatusCode.OK, dto)
                     return@get
                 } else if (rootId != null) {
-                    val dtos: List<ShortVerbDto> = transaction {
+                    val dtos: List<VerbShortDto> = transaction {
                         Verb.find { VerbTable.root eq rootId }
                             .with(Verb::translations)
-                            .map { it.toDtoShort() }
+                            .map { it.toShortDto() }
                     }
                     
                     return@get call.respond(HttpStatusCode.OK, dtos)
@@ -117,7 +128,7 @@ fun Application.verbApi() {
                     val pagedResponse = transaction {
                         val dtos = Verb.all().limit(size).offset((page * size).toLong())
                             .map { it.load(Verb::gizrahs, Verb::prepositions, Verb::root, Verb::binyan) }
-                            .map { it.toDto() }
+                            .map { it.toFullDto() }
                         val count = Verb.count()
                         PagedResponse(dtos, page, size, count)
                     }
@@ -142,7 +153,7 @@ fun Application.verbApi() {
                         this.lang = dto.lang
                         this.value = dto.value
                     })
-                    verb.toDto()
+                    verb.toFullDto()
                 }
                 call.respond(HttpStatusCode.Created, res)
             }
@@ -161,7 +172,7 @@ fun Application.verbApi() {
                         lang = dto.lang
                         value = dto.value
                         version += 1
-                    }.verb.toDto()
+                    }.verb.toFullDto()
                 } ?: return@patch call.respond(HttpStatusCode.NotFound, "Verb translation entity not found")
 
                 call.respond(HttpStatusCode.OK, verbDto)

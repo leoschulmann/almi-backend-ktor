@@ -1,5 +1,7 @@
-package com.leoschulmann.almi.tables
+package com.leoschulmann.almi.dbhelper
 
+import com.leoschulmann.almi.domain.GizrahTable
+import com.leoschulmann.almi.domain.VerbTable
 import org.jetbrains.exposed.sql.Table
 
 object VerbGizrahJointable : Table("appdata.verb_gizrah") {

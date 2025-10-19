@@ -1,4 +1,4 @@
-package com.leoschulmann.almi.entities
+package com.leoschulmann.almi.dbhelper
 
 import kotlinx.serialization.Serializable
 

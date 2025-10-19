@@ -1,7 +1,6 @@
 package com.leoschulmann.almi.api
 
-import com.leoschulmann.almi.dto.toDto
-import com.leoschulmann.almi.entities.Preposition
+import com.leoschulmann.almi.domain.Preposition
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

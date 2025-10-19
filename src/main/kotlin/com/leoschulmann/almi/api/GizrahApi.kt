@@ -1,8 +1,8 @@
 package com.leoschulmann.almi.api
 
-import com.leoschulmann.almi.dto.GizrahDto
-import com.leoschulmann.almi.dto.toDto
-import com.leoschulmann.almi.entities.Gizrah
+import com.leoschulmann.almi.domain.Gizrah
+import com.leoschulmann.almi.domain.GizrahDto
+import com.leoschulmann.almi.domain.ReqGizrahDto
 import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.post
 import io.github.smiley4.ktoropenapi.put
@@ -31,7 +31,7 @@ fun Application.gizrahApi() {
 
             put({
                 request {
-                    body<GizrahDto>()
+                    body<ReqGizrahDto>()
                 }
                 response {
                     code(HttpStatusCode.OK) { body<GizrahDto>() }
@@ -40,7 +40,7 @@ fun Application.gizrahApi() {
                 }
             }) {
                 
-                val (id, newval, _) = call.receive<GizrahDto>()
+                val (id, newval) = call.receive<ReqGizrahDto>()
 
                 if (newval.isBlank()) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid value")
@@ -71,7 +71,7 @@ fun Application.gizrahApi() {
                     }
                 }
             }) {
-                val gizrahs = transaction { Gizrah.all().map { it.toDto() } }
+                val gizrahs = transaction { Gizrah.all().map { gizrah: Gizrah -> gizrah.toDto() } }
                 call.respond(HttpStatusCode.OK, gizrahs)
                 return@get
             }

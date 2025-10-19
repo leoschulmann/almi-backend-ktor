@@ -1,6 +1,14 @@
 package com.leoschulmann.almi
 
-import com.leoschulmann.almi.tables.*
+import com.leoschulmann.almi.domain.BinyanTable
+import com.leoschulmann.almi.domain.GizrahTable
+import com.leoschulmann.almi.domain.PrepositionTable
+import com.leoschulmann.almi.domain.RootTable
+import com.leoschulmann.almi.domain.VerbFormTable
+import com.leoschulmann.almi.domain.VerbFormTranslitTable
+import com.leoschulmann.almi.domain.VerbTable
+import com.leoschulmann.almi.domain.VerbTranslationTable
+import com.leoschulmann.almi.dbhelper.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -27,7 +35,7 @@ object DatabaseFactory {
                 RootTable,
                 VerbGizrahJointable,
                 VerbPrepositionJointable,
-                VerbTable, 
+                VerbTable,
                 VerbTranslationTable,
                 VerbFormTable,
                 VerbFormTranslitTable

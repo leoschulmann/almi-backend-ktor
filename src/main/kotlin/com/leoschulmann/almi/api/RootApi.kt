@@ -1,9 +1,8 @@
 package com.leoschulmann.almi.api
 
-import com.leoschulmann.almi.dto.RootDto
-import com.leoschulmann.almi.dto.toDto
-import com.leoschulmann.almi.entities.PagedResponse
-import com.leoschulmann.almi.entities.Root
+import com.leoschulmann.almi.dbhelper.PagedResponse
+import com.leoschulmann.almi.domain.Root
+import com.leoschulmann.almi.domain.RootDto
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

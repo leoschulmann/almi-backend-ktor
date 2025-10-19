@@ -1,6 +1,7 @@
-package com.leoschulmann.almi.tables
+package com.leoschulmann.almi.dbhelper
 
-import org.h2.table.TableBase
+import com.leoschulmann.almi.domain.PrepositionTable
+import com.leoschulmann.almi.domain.VerbTable
 import org.jetbrains.exposed.sql.Table
 
 object VerbPrepositionJointable : Table("appdata.verb_preposition") {

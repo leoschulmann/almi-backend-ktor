@@ -1,12 +1,6 @@
 package com.leoschulmann.almi.api
 
-import com.leoschulmann.almi.dto.CreateVerbFormDto
-import com.leoschulmann.almi.dto.UpdateVerbFormDto
-import com.leoschulmann.almi.dto.toDto
-import com.leoschulmann.almi.entities.Verb
-import com.leoschulmann.almi.entities.VerbForm
-import com.leoschulmann.almi.entities.VerbFormTransliteration
-import com.leoschulmann.almi.tables.VerbFormTranslitTable
+import com.leoschulmann.almi.domain.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
