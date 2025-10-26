@@ -9,6 +9,7 @@ import com.leoschulmann.almi.domain.VerbFormTranslitTable
 import com.leoschulmann.almi.domain.VerbTable
 import com.leoschulmann.almi.domain.VerbTranslationTable
 import com.leoschulmann.almi.dbhelper.*
+import com.leoschulmann.almi.domain.VerbFormExampleTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -38,7 +39,8 @@ object DatabaseFactory {
                 VerbTable,
                 VerbTranslationTable,
                 VerbFormTable,
-                VerbFormTranslitTable
+                VerbFormTranslitTable,
+                VerbFormExampleTable
             )
         }
     }

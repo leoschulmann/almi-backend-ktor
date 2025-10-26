@@ -81,12 +81,6 @@ data class UpdateVerbFormDto(
     
     @SerialName("v")
     val value: String,
-
-//    @SerialName("cts")
-//    val createTransliterations: List<Pair<Lang, String>>,
-
-//    @SerialName("uts")
-//    val updateTransliterations: List<UpdateVerbFormTransliteration>
     
     @SerialName("t")
     val upsertTransliterations: List<UpsertVFormTransliterationDto>

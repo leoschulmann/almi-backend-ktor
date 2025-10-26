@@ -22,6 +22,13 @@ fun Application.verbFormApi() {
 
             fetchVerbForms()
         }
+        route("/api/vform/example") {
+            fetchExamples()
+
+            createVerbFormExampleDto()
+            
+            editVerbFormExampleDto()
+        }
     }
 }
 
@@ -134,4 +141,116 @@ private fun Route.createVerbForm() {
         }
         call.respond(HttpStatusCode.Created, verbForm)
     }
+}
+
+private fun Route.fetchExamples() {
+    get("{verbId}", {
+        request { pathParameter<Long>("verbId") { required = true } }
+        response {
+            code(HttpStatusCode.OK) { body<List<VerbFormExampleDto>>() }
+            code(HttpStatusCode.BadRequest) { }
+            code(HttpStatusCode.NotFound) { }
+        }
+    }) {
+        val id = call.parameters["verbId"]?.toLongOrNull()
+        if (id == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+            return@get
+        }
+
+        val verb: Verb? = transaction { Verb.findById(id)?.load(Verb::forms) }
+
+        if (verb == null) {
+            call.respond(HttpStatusCode.NotFound, "Verb entity not found")
+            return@get
+        }
+
+        val examplesDto = transaction {
+            VerbFormExample.find {
+                VerbFormExampleTable.verbForm inList verb.forms.map { it.id }
+            }.map { it.toDto() }
+        }
+
+        call.respond(HttpStatusCode.OK, examplesDto)
+    }
+}
+
+private fun Route.createVerbFormExampleDto() {
+    post({
+        request { body<CreateVerbFormExampleDto>() }
+        response {
+            code(HttpStatusCode.Created) { body<VerbFormExampleDto>() }
+            code(HttpStatusCode.BadRequest) { }
+            code(HttpStatusCode.NotFound) { }
+        }
+    }) {
+        val dto = call.receive<CreateVerbFormExampleDto>()
+        val verbForm = transaction { VerbForm.findById(dto.verbFormId) } ?: return@post call.respond(
+            HttpStatusCode.NotFound, "Verb form not found"
+        )
+
+        val resultDto = transaction {
+            VerbFormExample.new {
+                this.verbForm = verbForm
+                this.value = dto.value
+                this.file = dto.file
+            }.apply {
+                dto.translations.forEach { pair ->
+                    this.translations.plus(VerbFormExampleTranslation.new {
+                        this.lang = pair.first
+                        this.value = pair.second
+                        this.example = this@apply
+                    })
+                }
+            }.toDto()
+        }
+
+        call.respond(HttpStatusCode.Created, resultDto)
+    }
+}
+
+private fun Route.editVerbFormExampleDto() {
+    put({
+        request { body<UpdateVerbFormExampleDto>() }
+        response {
+            code(HttpStatusCode.OK) { body<VerbFormExampleDto>() }
+            code(HttpStatusCode.NotFound) { }
+            code(HttpStatusCode.BadRequest) { }
+        }
+    },{
+        val dto = call.receive<UpdateVerbFormExampleDto>()
+
+        val example = transaction { VerbFormExample.findById(dto.id) } ?: return@put call.respond(
+            HttpStatusCode.NotFound, "Example not found")
+
+        val tr8nsToInsert = dto.translations.filter { it.id == null }
+        val tr8nsToUpdate = dto.translations.filter { it.id != null }
+
+
+        val exampleDto = transaction {
+            tr8nsToInsert.forEach {
+                example.translations.plus(VerbFormExampleTranslation.new {
+                    this.lang = it.lang
+                    this.value = it.value
+                    this.example = example
+                })
+            }
+            tr8nsToUpdate.forEach { toupdatedto ->
+                example.translations.find { toupdatedto.id == it.id.value }?.let {
+                    if (it.lang != toupdatedto.lang || it.value != toupdatedto.value) {
+                        it.value = toupdatedto.value
+                        it.lang = toupdatedto.lang
+                        it.version += 1
+                    }
+                }
+            }
+            if (example.value != dto.value) {
+                example.value = dto.value
+                example.version += 1
+            }
+            example.toDto()
+        }
+
+        call.respond(HttpStatusCode.OK, exampleDto)
+    })
 }

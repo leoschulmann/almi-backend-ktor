@@ -40,7 +40,7 @@ data class TransliterationDto(
 
 @Serializable
 data class UpsertVFormTransliterationDto(
-    val id: Long?,
+    val id: Long? = null,
     @SerialName("v") val value: String,
     val lang: Lang
 )
