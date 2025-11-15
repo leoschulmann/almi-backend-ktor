@@ -1,6 +1,9 @@
 package com.leoschulmann.almi.domain
 
-import com.leoschulmann.almi.enums.Lang
+import com.leoschulmann.almi.enums.GrammaticalGender
+import com.leoschulmann.almi.enums.GrammaticalPerson
+import com.leoschulmann.almi.enums.Plurality
+import com.leoschulmann.almi.enums.Tense
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.LongEntity
@@ -28,6 +31,10 @@ class VerbFormExample(id: EntityID<Long>) : LongEntity(id) {
     fun toDto() = VerbFormExampleDto(
         id.value,
         value,
+        verbForm.tense,
+        verbForm.person,
+        verbForm.plurality,
+        verbForm.gender,
         version,
         file,
         translations.map { it.toDto() }
@@ -39,11 +46,19 @@ data class VerbFormExampleDto(
     val id: Long,
     @SerialName("e")
     val value: String,
+    @SerialName("t")
+    val tense: Tense,
+    @SerialName("p")
+    val person: GrammaticalPerson,
+    @SerialName("pl")
+    val plurality: Plurality,
+    @SerialName("g")
+    val gender: GrammaticalGender,
     @SerialName("ver")
     val version: Int,
     @SerialName("f")
     val file: String?,
-    @SerialName("t")
+    @SerialName("tr")
     val translations: List<VFormExampleTr8nDto>
 )
 
@@ -51,10 +66,9 @@ data class VerbFormExampleDto(
 data class CreateVerbFormExampleDto(
     @SerialName("f_id") val verbFormId: Long,
     @SerialName("e") val value: String,
-    @SerialName("f") val file: String?,
-    @SerialName("tr") val translations: List<Pair<Lang, String>>
+    @SerialName("f") val file: String? = null,
+    @SerialName("tr") val translations: List<CreateVerbTranslationDto> // TODO: rename type
 )
-
 @Serializable
 data class UpdateVerbFormExampleDto(
     val id: Long,

@@ -195,10 +195,10 @@ private fun Route.createVerbFormExampleDto() {
                 this.value = dto.value
                 this.file = dto.file
             }.apply {
-                dto.translations.forEach { pair ->
+                dto.translations.forEach { translation ->
                     this.translations.plus(VerbFormExampleTranslation.new {
-                        this.lang = pair.first
-                        this.value = pair.second
+                        this.lang = translation.lang
+                        this.value = translation.value
                         this.example = this@apply
                     })
                 }
