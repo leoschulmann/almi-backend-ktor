@@ -44,6 +44,16 @@ class Verb(id: EntityID<Long>) : LongEntity(id) {
 
     fun toShortDto() = VerbShortDto(
         id.value, value, version, translations.map { it.toDto() })
+
+    fun toSyncDto() = VerbSyncDto(
+        id.value,
+        value,
+        version,
+        root.id.value,
+        binyan.id.value,
+        gizrahs.map { it.id.value },
+        prepositions.map { it.id.value },
+        translations.map { it.toDto() })
 }
 
 @Serializable
@@ -62,6 +72,25 @@ data class VerbFullDto(
 
     @SerialName("p") val prepositions: List<PrepositionDto>,
 
+    @SerialName("t") val translations: List<VerbTranslationDto>
+)
+
+@Serializable
+data class VerbSyncDto(
+    val id: Long,
+    
+    @SerialName("v") val value: String,
+    
+    @SerialName("ver") val version: Int,
+    
+    @SerialName("r_id") val rootId: Long,
+    
+    @SerialName("b_id") val binyanId: Long,
+    
+    @SerialName("g_id") val gizrahIds: List<Long>,
+    
+    @SerialName("p_id") val prepositionIds: List<Long>,
+    
     @SerialName("t") val translations: List<VerbTranslationDto>
 )
 

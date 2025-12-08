@@ -159,7 +159,7 @@ private fun Route.fetchVerbs() {
             queryParameter<Int>("size") { required = true }
         }
         response {
-            code(HttpStatusCode.OK) { body<PagedResponse<VerbFullDto>>() }
+            code(HttpStatusCode.OK) { body<PagedResponse<VerbSyncDto>>() }
             code(HttpStatusCode.BadRequest) { }
         }
     }) {
@@ -173,7 +173,8 @@ private fun Route.fetchVerbs() {
 
         val pagedResponse = transaction {
             val dtos = Verb.all().limit(size).offset((page * size).toLong())
-                .map { it.load(Verb::gizrahs, Verb::prepositions, Verb::root, Verb::binyan) }.map { it.toFullDto() }
+//                .map { it.load(Verb::gizrahs, Verb::prepositions, Verb::root, Verb::binyan) }
+                .map { it.toSyncDto() }
             val count = Verb.count()
             PagedResponse(dtos, page, size, count)
         }
