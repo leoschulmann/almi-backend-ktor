@@ -1,5 +1,8 @@
 package com.leoschulmann.almi.api
 
+import com.leoschulmann.almi.dbhelper.PagedResponse
+import com.leoschulmann.almi.dbhelper.VerbPrepositionJointable
+import com.leoschulmann.almi.dbhelper.VerbPrepositionLinkDto
 import com.leoschulmann.almi.domain.Preposition
 import com.leoschulmann.almi.domain.PrepositionDto
 import com.leoschulmann.almi.domain.UpdatePrepositionDto
@@ -76,14 +79,11 @@ fun Application.prepositionApi() {
                     code(HttpStatusCode.OK) { body<List<PrepositionDto>>() }
                 }
             }) {
-                val id = call.parameters["id"]?.toLongOrNull()
-                if (id == null) {
-                    val dtos = transaction {
-                        Preposition.all().map { it.toDto() }
-                    }
-                    call.respond(HttpStatusCode.OK, dtos)
-                    return@get
+                val dtos = transaction {
+                    Preposition.all().map { it.toDto() }
                 }
+                call.respond(HttpStatusCode.OK, dtos)
+                return@get
             }
 
             get("{id}", {
@@ -107,6 +107,32 @@ fun Application.prepositionApi() {
                     call.respond(HttpStatusCode.OK, preposition.toDto())
                 }
 
+            }
+
+            route("/links") {
+                get({
+                    request {
+                        queryParameter<Int>("page") { required = true }
+                        queryParameter<Int>("size") { required = true }
+                    }
+                    response { code(HttpStatusCode.OK) { body<PagedResponse<VerbPrepositionLinkDto>>() } }
+                }) {
+
+                    val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
+                    val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+
+                    if (page < 0 || size <= 0) {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid page or size parameters")
+                        return@get
+                    }
+
+                    val links =
+                        VerbPrepositionJointable.getPaginatedPrepositionLinks(size, (page * size).toLong())
+
+                    val count = VerbPrepositionJointable.countPrepositionLinks()
+                    val pagedResponse = PagedResponse(links, page, size, count)
+                    call.respond(HttpStatusCode.OK, pagedResponse)
+                }
             }
         }
     }

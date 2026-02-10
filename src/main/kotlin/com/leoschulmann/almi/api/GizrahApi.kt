@@ -1,5 +1,8 @@
 package com.leoschulmann.almi.api
 
+import com.leoschulmann.almi.dbhelper.PagedResponse
+import com.leoschulmann.almi.dbhelper.VerbGizrahJointable
+import com.leoschulmann.almi.dbhelper.VerbPrepositionJointable
 import com.leoschulmann.almi.domain.Gizrah
 import com.leoschulmann.almi.domain.GizrahDto
 import com.leoschulmann.almi.domain.ReqGizrahDto
@@ -9,7 +12,7 @@ import io.github.smiley4.ktoropenapi.put
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -101,6 +104,32 @@ fun Application.gizrahApi() {
                     } else {
                         call.respond(HttpStatusCode.OK, gizrah.toDto())
                     }
+                }
+            }
+            
+            route("/links") {
+                get({
+                    request {
+                        queryParameter<Int>("page") { required = true }
+                        queryParameter<Int>("size") { required = true }
+                    }
+                    response { code(HttpStatusCode.OK) { body<PagedResponse<VerbPrepositionJointable>>() } }
+                }) {
+
+                    val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
+                    val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+
+                    if (page < 0 || size <= 0) {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid page or size parameters")
+                        return@get
+                    }
+
+                    val links =
+                        VerbGizrahJointable.getPaginatedGizrahLinks(size, (page * size).toLong())
+
+                    val count = VerbGizrahJointable.countGizrahLinks()
+                    val pagedResponse = PagedResponse(links, page, size, count)
+                    call.respond(HttpStatusCode.OK, pagedResponse)
                 }
             }
         }
