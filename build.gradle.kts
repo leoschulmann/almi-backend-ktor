@@ -1,6 +1,6 @@
 
 val exposed_version: String by project
-val h2_version: String by project
+val liquibase_version: String by project
 val koin_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -34,7 +34,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
-    implementation("com.h2database:h2:$h2_version")
+    implementation("org.liquibase:liquibase-core:$liquibase_version")
     implementation("io.github.smiley4:ktor-swagger-ui:5.3.0")
     implementation("io.github.smiley4:ktor-openapi:5.3.0")
     implementation("io.ktor:ktor-serialization-jackson-jvm")
