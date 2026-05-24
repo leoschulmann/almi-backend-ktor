@@ -39,7 +39,9 @@ fun Application.configureDatabase() {
 private fun runMigrations(url: String, user: String, password: String) {
     log.info("Running Liquibase migrations...")
     val connection = DriverManager.getConnection(url, user, password)
+    connection.createStatement().use { it.execute("CREATE SCHEMA IF NOT EXISTS appdata") }
     val database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(JdbcConnection(connection))
+    database.defaultSchemaName = "appdata"
     Liquibase("db/changelog/db.changelog-master.yaml", ClassLoaderResourceAccessor(), database).use { lb ->
         lb.update("")
     }
