@@ -7,6 +7,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.ResultRow
 
 
 object VerbFormTranslitTable : LongIdTable("appdata.verbformtranslit") {
@@ -25,11 +26,31 @@ class VerbFormTransliteration(id: EntityID<Long>) : LongEntity(id) {
     var lang: Lang by VerbFormTranslitTable.lang
 
     fun toDto() = TransliterationDto(id.value, value, version, lang)
+    fun toSyncDto() = TransliterationSyncDto(id.value, verbForm.id.value, value, version, lang)
 }
+
+fun ResultRow.mapRowToVFormTtanslitSyncDto(): TransliterationDto = TransliterationDto(
+    id = this[VerbFormTranslitTable.id].value,
+    value = this[VerbFormTranslitTable.value],
+    version = this[VerbFormTranslitTable.version],
+    lang = this[VerbFormTranslitTable.lang]
+)
 
 @Serializable
 data class TransliterationDto(
     val id: Long,
+    @SerialName("v")
+    val value: String,
+    @SerialName("ver")
+    val version: Int,
+    val lang: Lang
+)
+
+@Serializable
+data class TransliterationSyncDto(
+    val id: Long,
+    @SerialName("vf")
+    val verbFormId: Long,
     @SerialName("v")
     val value: String,
     @SerialName("ver")

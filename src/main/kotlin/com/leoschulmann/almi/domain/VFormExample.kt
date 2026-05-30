@@ -10,6 +10,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SizedIterable
 
 object VerbFormExampleTable : LongIdTable("appdata.verbformexample") {
@@ -60,6 +61,39 @@ data class VerbFormExampleDto(
     val file: String?,
     @SerialName("tr")
     val translations: List<VFormExampleTr8nDto>
+)
+
+@Serializable
+data class VerbFormExampleSyncDto(
+    val id: Long,
+    @SerialName("vf") val verbFormId: Long,
+    @SerialName("e") val value: String,
+    @SerialName("f") val file: String?,
+    @SerialName("ver") val version: Int,
+    val translations: MutableList<VFormExampleTr8nSyncDto> = mutableListOf()
+)
+
+@Serializable
+data class VFormExampleTr8nSyncDto(
+    val id: Long,
+    @SerialName("l") val lang: String,
+    @SerialName("t") val value: String,
+    @SerialName("ver") val version: Int
+)
+
+fun ResultRow.mapRowToExampleSyncDto() = VerbFormExampleSyncDto(
+    id = this[VerbFormExampleTable.id].value,
+    verbFormId = this[VerbFormExampleTable.verbForm].value,
+    value = this[VerbFormExampleTable.value],
+    file = this[VerbFormExampleTable.file],
+    version = this[VerbFormExampleTable.version]
+)
+
+fun ResultRow.mapRowToExampleTr8nSyncDto() = VFormExampleTr8nSyncDto(
+    id = this[VerbFormExampleTranslationTable.id].value,
+    lang = this[VerbFormExampleTranslationTable.lang].name,
+    value = this[VerbFormExampleTranslationTable.value],
+    version = this[VerbFormExampleTranslationTable.version]
 )
 
 @Serializable

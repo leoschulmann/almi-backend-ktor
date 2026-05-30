@@ -12,6 +12,7 @@ ktor:
           - com.leoschulmann.almi.CORSConfigurationKt.configureCORS
           - com.leoschulmann.almi.api.LangApiKt.langApi
           - com.leoschulmann.almi.api.SwaggerAPIKt.swaggerAPI
+          - com.leoschulmann.almi.api.SyncApiKt.syncApi
     deployment:
         port: 9999
 postgres:

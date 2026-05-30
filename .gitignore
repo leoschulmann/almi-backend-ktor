@@ -51,3 +51,5 @@ tmp/
 ### OS Specific ###
 .DS_Store
 Thumbs.db
+/gradlew
+/gradlew.bat

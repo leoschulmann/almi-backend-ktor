@@ -1,5 +1,6 @@
 package com.leoschulmann.almi.api
 
+import com.leoschulmann.almi.dbhelper.PagedResponse
 import com.leoschulmann.almi.domain.*
 import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.post
@@ -21,6 +22,21 @@ fun Application.verbFormApi() {
             updateVerbForm()
 
             fetchVerbForms()
+        }
+        route("/api/vform/sync") {
+            get({
+                request {
+                    queryParameter<Int>("page") { required = true }
+                    queryParameter<Int>("size") { required = true }
+                }
+                response { code(HttpStatusCode.OK) { body<PagedResponse<VerbFormSyncDto>>() } }
+            }) {
+                
+                val result = transaction {
+//                    VerbForm.find { VerbFormTable.version.isNotNull() }.map { it.toDto() }
+                }
+//                call.respond(HttpStatusCode.OK, PagedResponse(result))
+            }
         }
         route("/api/vform/example") {
             fetchExamples()

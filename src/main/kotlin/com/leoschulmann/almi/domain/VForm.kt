@@ -7,6 +7,7 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SizedIterable
 
 
@@ -36,6 +37,18 @@ class VerbForm(id: EntityID<Long>) : LongEntity(id) {
         VerbFormDto(id.value, value, version, tense, person, plurality, gender, transliterations.map { it.toDto() })
 }
 
+fun ResultRow.mapRowToVFormSyncDto(): VerbFormSyncDto = VerbFormSyncDto(
+    id = this[VerbFormTable.id].value,
+    verbId = this[VerbFormTable.verb].value,
+    value = this[VerbFormTable.value],
+    tense = this[VerbFormTable.tense],
+    person = this[VerbFormTable.person],
+    plurality = this[VerbFormTable.plurality],
+    gender = this[VerbFormTable.gender],
+    version = this[VerbFormTable.version],
+    transliterations = mutableListOf()
+)
+
 
 @Serializable
 data class VerbFormDto(
@@ -54,6 +67,31 @@ data class VerbFormDto(
     val gender: GrammaticalGender,
     @SerialName("ts")
     val transliterations: List<TransliterationDto>
+)
+
+@Serializable
+data class VerbFormSyncDto(
+    val id: Long,
+    @SerialName("vb")
+    val verbId: Long,
+    @SerialName("v")
+    val value: String,
+    @SerialName("ver")
+    val version: Int,
+    @SerialName("t")
+    @Serializable(with = TenseOrdinalSerializer::class)
+    val tense: Tense,
+    @SerialName("p")
+    @Serializable(with = GPersonOrdinalSerializer::class)
+    val person: GrammaticalPerson,
+    @SerialName("pl")
+    @Serializable(with = PluralityOrdinalSerializer::class)
+    val plurality: Plurality,
+    @SerialName("g")
+    @Serializable(with = GGenderOrdinalSerializer::class)
+    val gender: GrammaticalGender,
+    @SerialName("ts")
+    val transliterations: MutableList<TransliterationDto>
 )
 
 @Serializable

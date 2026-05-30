@@ -2,7 +2,6 @@ package com.leoschulmann.almi.api
 
 import com.leoschulmann.almi.dbhelper.PagedResponse
 import com.leoschulmann.almi.dbhelper.VerbGizrahJointable
-import com.leoschulmann.almi.dbhelper.VerbPrepositionJointable
 import com.leoschulmann.almi.domain.Gizrah
 import com.leoschulmann.almi.domain.GizrahDto
 import com.leoschulmann.almi.domain.ReqGizrahDto
@@ -12,7 +11,7 @@ import io.github.smiley4.ktoropenapi.put
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
-import io.ktor.server.response.respond
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -113,7 +112,7 @@ fun Application.gizrahApi() {
                         queryParameter<Int>("page") { required = true }
                         queryParameter<Int>("size") { required = true }
                     }
-                    response { code(HttpStatusCode.OK) { body<PagedResponse<VerbPrepositionJointable>>() } }
+                    response { code(HttpStatusCode.OK) { body<PagedResponse<VerbGizrahJointable>>() } }
                 }) {
 
                     val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0

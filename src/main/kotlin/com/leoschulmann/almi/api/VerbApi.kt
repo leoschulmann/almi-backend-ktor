@@ -173,7 +173,6 @@ private fun Route.fetchVerbs() {
 
         val pagedResponse = transaction {
             val dtos = Verb.all().limit(size).offset((page * size).toLong())
-//                .map { it.load(Verb::gizrahs, Verb::prepositions, Verb::root, Verb::binyan) }
                 .map { it.toSyncDto() }
             val count = Verb.count()
             PagedResponse(dtos, page, size, count)
